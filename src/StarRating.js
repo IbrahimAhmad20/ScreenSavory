@@ -16,6 +16,7 @@ export default function StarRating({
   maxRating = 5,
   size = 36,
   color = "#fcc419",
+  setRatings,
 }) {
   const [rating, setRating] = useState(0);
   const [tempRating, setTempRating] = useState(0);
@@ -27,6 +28,11 @@ export default function StarRating({
     color,
   };
 
+  function handleRate(i) {
+    setRating(i + 1);
+    setRatings(i + 1);
+  }
+
   return (
     <div style={styleContainer}>
       <div style={styleStars}>
@@ -34,7 +40,7 @@ export default function StarRating({
           return (
             <Star
               key={i}
-              onRate={() => setRating(i + 1)}
+              onRate={() => handleRate(i)}
               onEnter={() => setTempRating(i + 1)}
               onLeave={() => setTempRating(0)}
               full={tempRating ? tempRating <= i : rating <= i}
