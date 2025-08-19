@@ -82,12 +82,14 @@ export default function App() {
   }
   useEffect(
     function () {
+      const controller = new AbortController();
       async function fetchMovies() {
         try {
           setIsLoading(true);
           setError("");
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            { signal: controller.signal }
           );
           if (!res.ok)
             throw new Error("Something went wrong while fething movies");
@@ -96,15 +98,19 @@ export default function App() {
           if (data.Response === "False")
             throw new Error("No Movie Found. Check spelling mistakes");
           setMovies(data.Search);
+          setError("");
           console.log(data.Search);
         } catch (err) {
-          console.error(err);
-          setError(err.message);
+          if (err.name !== "AbortError") setError(err.message);
         } finally {
           setIsLoading(false);
         }
       }
       fetchMovies();
+
+      return function () {
+        controller.abort();
+      };
     },
     [query]
   );
@@ -243,7 +249,38 @@ function Movies({ movie, handleSelectedMovie }) {
     </li>
   );
 }
-
+function Summary({ watched }) {
+  const avgImdbRating = average(
+    watched.map((movie) => movie.imdbRating)
+  ).toFixed(2);
+  const avgUserRating = average(
+    watched.map((movie) => movie.userRating)
+  ).toFixed(2);
+  const avgRuntime = average(watched.map((movie) => movie.runtime));
+  return (
+    <div className="summary">
+      <h2>Movies you watched</h2>
+      <div>
+        <p>
+          <span>#️⃣</span>
+          <span>{watched.length} movies</span>
+        </p>
+        <p>
+          <span>⭐️</span>
+          <span>{avgImdbRating}</span>
+        </p>
+        <p>
+          <span>🌟</span>
+          <span>{avgUserRating}</span>
+        </p>
+        <p>
+          <span>⏳</span>
+          <span>{avgRuntime || 0} min</span>
+        </p>
+      </div>
+    </div>
+  );
+}
 function MovieDetails({ Id, hanleBack, handleAddtoList }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -279,6 +316,17 @@ function MovieDetails({ Id, hanleBack, handleAddtoList }) {
     [Id]
   );
 
+  useEffect(
+    function () {
+      if (!title) return;
+      document.title = `Movie | ${title}`;
+
+      return function () {
+        document.title = "Screen Savory";
+      };
+    },
+    [title]
+  );
   return (
     <div className="details">
       {isLoading ? (
@@ -328,39 +376,6 @@ function MovieDetails({ Id, hanleBack, handleAddtoList }) {
   );
 }
 
-function Summary({ watched }) {
-  const avgImdbRating = average(
-    watched.map((movie) => movie.imdbRating)
-  ).toFixed(2);
-  const avgUserRating = average(
-    watched.map((movie) => movie.userRating)
-  ).toFixed(2);
-  const avgRuntime = average(watched.map((movie) => movie.runtime));
-  return (
-    <div className="summary">
-      <h2>Movies you watched</h2>
-      <div>
-        <p>
-          <span>#️⃣</span>
-          <span>{watched.length} movies</span>
-        </p>
-        <p>
-          <span>⭐️</span>
-          <span>{avgImdbRating}</span>
-        </p>
-        <p>
-          <span>🌟</span>
-          <span>{avgUserRating}</span>
-        </p>
-        <p>
-          <span>⏳</span>
-          <span>{avgRuntime} min</span>
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function SummaryList({ watched, handleDelete }) {
   return (
     <ul className="list">
@@ -376,6 +391,7 @@ function SummaryList({ watched, handleDelete }) {
 }
 
 function MovieWatched({ movie, handleDelete }) {
+  console.log("Movies Watched State", movie);
   return (
     <li>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
@@ -391,7 +407,7 @@ function MovieWatched({ movie, handleDelete }) {
         </p>
         <p>
           <span>⏳</span>
-          <span>{movie.runtime} min</span>
+          <span>{movie.Runtime}</span>
         </p>
       </div>
       <button className="btn-delete" onClick={() => handleDelete(movie)}>
