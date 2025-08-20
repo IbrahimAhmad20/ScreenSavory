@@ -79,9 +79,16 @@ export function MovieDetails({ Id, hanleBack, handleAddtoList }) {
               {ratings > 0 && (
                 <button
                   className="btn-add"
-                  onClick={() =>
-                    handleAddtoList({ ...movie, userRating: ratings })
-                  }
+                  onClick={() => {
+                    handleAddtoList({
+                      ...movie,
+                      userRating: ratings,
+                      runtime:
+                        movie.Runtime && movie.Runtime !== "N/A"
+                          ? Number(movie.Runtime.split(" ")[0])
+                          : null,
+                    });
+                  }}
                 >
                   &#43; &nbsp; Add to List
                 </button>
