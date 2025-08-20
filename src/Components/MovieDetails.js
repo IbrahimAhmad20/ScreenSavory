@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { KEY } from "../App";
 import Loader from "./Loader";
 import StarRating from "./StarRating";
+
+const KEY = "7cb97c71";
 
 export function MovieDetails({ Id, hanleBack, handleAddtoList }) {
   const [movie, setMovie] = useState({});
