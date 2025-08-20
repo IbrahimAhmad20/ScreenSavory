@@ -11,7 +11,7 @@ function averageRuntime(movies) {
   return sum / runtimes.length;
 }
 
-export function Summary({ watched }) {
+export function Summary({ watched = [] }) {
   const avgImdbRating = average(
     watched.map((movie) => movie.imdbRating)
   ).toFixed(2);
