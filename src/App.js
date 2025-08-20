@@ -16,9 +16,18 @@ export const average = (arr) =>
 export default function App() {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  // const [watched, setWatched] = useState(function () {
+  //   const storedItems = localStorage.getItem("watched");
+  //   return JSON.parse(storedItems);
+  // });
   const [watched, setWatched] = useState(function () {
-    const storedItems = localStorage.getItem("watched");
-    return JSON.parse(storedItems);
+    try {
+      const storedItems = localStorage.getItem("watched");
+      const parsed = storedItems ? JSON.parse(storedItems) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   });
 
   function handleSelectedMovie(id) {
