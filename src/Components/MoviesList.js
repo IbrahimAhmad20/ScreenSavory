@@ -1,4 +1,4 @@
-import Movies from "../App";
+import { Movies } from "../App";
 
 export function MoviesList({ movies, handleSelectedMovie }) {
   return (
